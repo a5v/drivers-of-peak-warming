@@ -2,17 +2,15 @@ import pandas as pd
 import numpy as np
 from scipy.integrate import simps
 import statsmodels.api as sm
-# from fair import *
 from fair.scripts.data_retrieval import RCMIP_to_FaIR_input_emms
 
 
-def peak_temperature_calculator(P_h=44, r=20, s=18, Am=1, consumption_discount=0.035):
+def peak_temperature_calculator(consumption_discount=0.035, gamma=2, D0=0.00267, P_h=44, r=20, s=18, Am=1.1,
+                                end_year=2500, last_perturbed_year=2100, return_all_output=False):
 
     start_year = 1750
     last_historical_year = 2019
-    end_year = 2500
     first_perturbed_year = last_historical_year
-    last_perturbed_year = 2100
 
     years_complete = create_years_array(start_year, end_year)
     years_of_perturbation = create_years_array(first_perturbed_year, last_perturbed_year)
@@ -25,7 +23,7 @@ def peak_temperature_calculator(P_h=44, r=20, s=18, Am=1, consumption_discount=0
     delta_T = 2
     alpha = 0.02
 
-    T_2019, T_historical = read_T_df()
+    T_2019, T_historical = read_historical_T()
 
     T_complete_initial, T_forecasted_initial = create_T_initial(T_2019, T_historical, alpha, delta_T,
                                                                 years_forecasted_length)
@@ -41,7 +39,7 @@ def peak_temperature_calculator(P_h=44, r=20, s=18, Am=1, consumption_discount=0
 
         SCC_array = calculate_SCC_for_perturbed_years(T_TCRE, T_forecasted_iteration, years_forecasted_length, years_forecasted,
                                                       T_historical, T_complete_iteration, W, consumption_discount, k_s, years_complete,
-                                                      years_of_perturbation)
+                                                      years_of_perturbation, gamma, D0)
 
         SCC_forecasted, P0 = forecast_SCC(SCC_array, years_forecasted, years_of_perturbation)
 
@@ -54,7 +52,13 @@ def peak_temperature_calculator(P_h=44, r=20, s=18, Am=1, consumption_discount=0
         T_forecasted_iteration = T_2019 + temperature_change
         T_complete_iteration = np.concatenate([T_historical, T_forecasted_iteration[1:]])
 
-    return max(T_complete_iteration)
+    peak_T = max(T_complete_iteration)
+    T_complete = T_complete_iteration
+
+    if return_all_output:
+        return peak_T, SCC_forecasted, forecasted_abatement, forecasted_emissions, T_complete
+    else:
+        return peak_T
 
 
 def create_T_initial(T_2019, T_historical, alpha, delta_T, years_forecasted_length):
@@ -63,7 +67,7 @@ def create_T_initial(T_2019, T_historical, alpha, delta_T, years_forecasted_leng
     return T_complete_initial, T_forecasted_initial
 
 
-def read_T_df():
+def read_historical_T():
     T_gas_df = pd.read_csv("T_gas.csv", index_col=0)
     T_historical = T_gas_df['CO2_best']
     T_2019 = T_historical[2019]
@@ -90,7 +94,8 @@ def forecast_SCC(SCC_array, T_forecast_years, years_of_perturbation):
 
 
 def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_length, T_forecast_years, T_gas_df,
-                                      T_total_iteration, W, consumption_discount, k_s, years, years_of_perturbation):
+                                      T_total_iteration, W, consumption_discount, k_s, years, years_of_perturbation,
+                                      gamma, D0):
     SCC_list = []
     for perturbed_year in range(len(years_of_perturbation)):
         ## define perturbation
@@ -101,7 +106,7 @@ def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_l
         ## define discount function
         discount_function = create_discount_function(consumption_discount, perturbed_year, years,
                                                      years_of_perturbation)
-        cost = cost_of_perturbation(T_total_iteration, T_perturbed, W, discount_function)
+        cost = cost_of_perturbation(T_total_iteration, T_perturbed, W, discount_function, gamma, D0)
         SCC = cost / (10 ** 9)
         SCC_list.append(SCC)
     SCC_array = np.asarray(SCC_list)
