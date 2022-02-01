@@ -5,7 +5,7 @@ import statsmodels.api as sm
 from fair.scripts.data_retrieval import RCMIP_to_FaIR_input_emms
 
 
-def peak_temperature_calculator(consumption_discount=0.035, gamma=2, D0=0.00267, P_h=44, r=20, s=18, Am=1.1,
+def peak_warming_calculator(consumption_discount=0.035, gamma=2, D0=0.00267, P_h=44, r=20, s=18, Am=1.1,
                                 end_year=2500, last_perturbed_year=2100, return_all_output=False):
 
     start_year = 1750
