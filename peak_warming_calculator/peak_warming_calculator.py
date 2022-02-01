@@ -151,11 +151,11 @@ def create_years_array(first_year, end_year):
 
 
 def create_total_consumption(first_year, last_historical_year, years):
-    consumption_growth = 1.02
+    consumption_growth = 0.02
     W_2019 = 80
     W = []
     for i in range(len(years)):
-        W.append(W_2019 * consumption_growth ** (i - (last_historical_year - first_year)))
+        W.append(W_2019 * np.exp(consumption_growth * (i - (last_historical_year - first_year))))
     W = np.asarray(W)
     return W
 
