@@ -47,9 +47,10 @@ def peak_warming_calculator(consumption_discount=0.035, gamma=2, D0=0.00267, P_h
         forecasted_emissions = abatement_to_emissions(forecasted_abatement, CO2_baseline)
         cumulative_emissions_array = calculate_cumulative_emissions(years_forecasted, forecasted_emissions)
         temperature_change = T_TCRE * cumulative_emissions_array
+        temperature_change_plateau = temp_change_plateau(temperature_change)
 
         # define T_iteration for next loop
-        T_forecasted_iteration = T_2019 + temperature_change
+        T_forecasted_iteration = T_2019 + temperature_change_plateau
         T_complete_iteration = np.concatenate([T_historical, T_forecasted_iteration[1:]])
 
     peak_T = max(T_complete_iteration)
@@ -59,6 +60,14 @@ def peak_warming_calculator(consumption_discount=0.035, gamma=2, D0=0.00267, P_h
         return peak_T, SCC_forecasted, forecasted_abatement, forecasted_emissions, T_complete
     else:
         return peak_T
+
+
+def temp_change_plateau(temperature_change):
+    temperature_change_plateau = np.array(temperature_change, copy=True)
+    for i in range(len(temperature_change_plateau)):
+        if i > np.argmax(temperature_change_plateau):
+            temperature_change_plateau[i] = max(temperature_change_plateau)
+    return temperature_change_plateau
 
 
 def create_T_initial(T_2019, T_historical, alpha, delta_T, years_forecasted_length):
