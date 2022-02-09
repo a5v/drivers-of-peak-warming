@@ -6,7 +6,7 @@ from fair.scripts.data_retrieval import RCMIP_to_FaIR_input_emms
 
 
 def peak_warming_calculator(consumption_discount=0.035, gamma=2, D0=0.00267, P_h=44, r=20, s=18, Am=1.1,
-                                end_year=2500, last_perturbed_year=2100, return_all_output=False):
+                                end_year=2500, last_perturbed_year=2200, return_all_output=False):
 
     start_year = 1750
     last_historical_year = 2019
@@ -93,11 +93,22 @@ def calculate_cumulative_emissions(T_forecast_years, forecasted_emissions):
 
 
 def forecast_SCC(SCC_array, T_forecast_years, years_of_perturbation):
-    log_SCC = np.log(SCC_array)
-    ## add linear fit
-    X = sm.add_constant(years_of_perturbation)  # add a constant to fit
-    results = sm.OLS(log_SCC, X).fit()  # save results of fit
-    SCC_forecasted = np.exp(results.params[0] + results.params[1] * T_forecast_years)
+    # log_SCC = np.log(SCC_array)
+    # ## add linear fit
+    # X = sm.add_constant(years_of_perturbation)  # add a constant to fit
+    # results = sm.OLS(log_SCC, X).fit()  # save results of fit
+    # SCC_forecasted = np.exp(results.params[0] + results.params[1] * T_forecast_years)
+
+    SCC_forecasted = []
+
+    for i in range(len(T_forecast_years)):
+        if i < len(years_of_perturbation):
+            SCC_forecasted.append(SCC_array[i])
+        else:
+            SCC_forecasted.append(SCC_array[-1])
+
+    SCC_forecasted = np.array(SCC_forecasted)
+
     P0 = SCC_forecasted[0]
     return SCC_forecasted, P0
 
