@@ -5,8 +5,11 @@ import statsmodels.api as sm
 from fair.scripts.data_retrieval import RCMIP_to_FaIR_input_emms
 
 
-def peak_warming_calculator(consumption_discount=0.035, gamma=2, D0=0.00267, P_h=44, r=20, s=18, Am=1.1,
-                                end_year=2500, last_perturbed_year=2200, return_all_output=False):
+def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
+                            gamma=2, D0=0.00267,
+                            P_h=44, r=20, s=18, Am=1.1,
+                            end_year=2500, last_perturbed_year=2200,
+                            return_all_output=False):
 
     start_year = 1750
     last_historical_year = 2019
@@ -28,7 +31,7 @@ def peak_warming_calculator(consumption_discount=0.035, gamma=2, D0=0.00267, P_h
     T_complete_initial, T_forecasted_initial = create_T_initial(T_2019, T_historical, alpha, delta_T,
                                                                 years_forecasted_length)
 
-    W = create_total_consumption(start_year, last_historical_year, years_complete)
+    W = create_total_consumption(start_year, last_historical_year, years_complete, consumption_growth)
 
     CO2_baseline = get_CO2_baseline()
 
@@ -170,8 +173,7 @@ def create_years_array(first_year, end_year):
     return years
 
 
-def create_total_consumption(first_year, last_historical_year, years):
-    consumption_growth = 0.02
+def create_total_consumption(first_year, last_historical_year, years, consumption_growth):
     W_2019 = 80
     W = []
     for i in range(len(years)):
