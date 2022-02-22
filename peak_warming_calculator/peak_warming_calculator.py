@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.integrate import simps
 import statsmodels.api as sm
-from fair.scripts.data_retrieval import RCMIP_to_FaIR_input_emms
+# from fair.scripts.data_retrieval import RCMIP_to_FaIR_input_emms
 
 
 def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
@@ -159,11 +159,13 @@ def create_discount_function(consumption_discount, perturbed_year, years, years_
 
 
 def get_CO2_baseline():
-    ssp = 'ssp245'
-    # get emissions data using imported scripts + convert into FaIRv2.0.0-alpha multiindex format
-    ssp_emms = pd.concat([get_ssp_emissions(ssp)], axis=1, keys=[ssp])
+    # ssp = 'ssp245'
+    # # get emissions data using imported scripts + convert into FaIRv2.0.0-alpha multiindex format
+    # ssp_emms = pd.concat([get_ssp_emissions(ssp)], axis=1, keys=[ssp])
+    ssp_df = pd.read_csv("ssp245.csv", index_col=0)
     CtoCO2_conversion = 44 / 12
-    ssp245_CO2_past = ssp_emms["ssp245"]["carbon_dioxide"] * CtoCO2_conversion
+    # ssp245_CO2_past = ssp_emms["ssp245"]["carbon_dioxide"] * CtoCO2_conversion
+    ssp245_CO2_past = ssp_df["carbon_dioxide"] * CtoCO2_conversion
     CO2_baseline = ssp245_CO2_past[2019]
     return CO2_baseline
 
@@ -200,15 +202,15 @@ def abatement(P, P0, P_h, r, s, Am):
     return A
 
 
-def get_ssp_emissions(ssp, end_year=2019):
-    emms = RCMIP_to_FaIR_input_emms(ssp).interpolate().loc[1750:end_year]
-
-    ## rebase emission-driven forcings & species with natural emissions included in RCMIP to zero @ 1750
-    rebase_species = ['so2', 'nox', 'co', 'nmvoc', 'bc', 'nh3', 'oc', 'nox_avi', 'methyl_bromide', 'methyl_chloride',
-                      'chcl3', 'ch2cl2']
-    emms.loc[:, rebase_species] -= emms.loc[1750, rebase_species]
-
-    return emms
+# def get_ssp_emissions(ssp, end_year=2019):
+#     emms = RCMIP_to_FaIR_input_emms(ssp).interpolate().loc[1750:end_year]
+#
+#     ## rebase emission-driven forcings & species with natural emissions included in RCMIP to zero @ 1750
+#     rebase_species = ['so2', 'nox', 'co', 'nmvoc', 'bc', 'nh3', 'oc', 'nox_avi', 'methyl_bromide', 'methyl_chloride',
+#                       'chcl3', 'ch2cl2']
+#     emms.loc[:, rebase_species] -= emms.loc[1750, rebase_species]
+#
+#     return emms
 
 
 def abatement_to_emissions(forecasted_abatement, CO2_baseline):
