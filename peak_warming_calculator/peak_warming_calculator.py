@@ -38,11 +38,13 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
     T_complete_iteration = T_complete_initial
     for iteration in range(num_of_iterations):
 
-        SCC_array = calculate_SCC_for_perturbed_years(T_TCRE, T_forecasted_iteration, years_forecasted_length, years_forecasted,
+        SCC_calculated = calculate_SCC_for_perturbed_years(T_TCRE, T_forecasted_iteration, years_forecasted_length, years_forecasted,
                                                       T_historical, T_complete_iteration, W, consumption_discount, k_s, years_complete,
                                                       years_of_perturbation, gamma, D0)
 
-        SCC_forecasted, P0 = forecast_SCC(SCC_array, years_forecasted, years_of_perturbation)
+        check_SCC_calculated(P_100, SCC_calculated)
+
+        SCC_forecasted, P0 = forecast_SCC(SCC_calculated, years_forecasted, years_of_perturbation)
 
         forecasted_abatement = abatement(P=SCC_forecasted, P0=P0, P_50=P_50, s=s, P_100=P_100, r=consumption_discount)
         forecasted_emissions = abatement_to_emissions(forecasted_abatement, CO2_baseline)
@@ -61,6 +63,11 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
         return peak_T, SCC_forecasted, forecasted_abatement, forecasted_emissions, T_complete
     else:
         return peak_T
+
+
+def check_SCC_calculated(P_100, SCC_calculated):
+    if SCC_calculated[-1] < P_100:
+        print("P_100 not achieved by achieved by final perturbed year")
 
 
 def temp_change_plateau(temperature_change):
@@ -93,8 +100,8 @@ def calculate_cumulative_emissions(T_forecast_years, forecasted_emissions):
     return cumulative_emissions_array
 
 
-def forecast_SCC(SCC_array, T_forecast_years, years_of_perturbation):
-    # log_SCC = np.log(SCC_array)
+def forecast_SCC(SCC_calculated, T_forecast_years, years_of_perturbation):
+    # log_SCC = np.log(SCC_calculated)
     # ## add linear fit
     # X = sm.add_constant(years_of_perturbation)  # add a constant to fit
     # results = sm.OLS(log_SCC, X).fit()  # save results of fit
@@ -104,9 +111,9 @@ def forecast_SCC(SCC_array, T_forecast_years, years_of_perturbation):
 
     for i in range(len(T_forecast_years)):
         if i < len(years_of_perturbation):
-            SCC_forecasted.append(SCC_array[i])
+            SCC_forecasted.append(SCC_calculated[i])
         else:
-            SCC_forecasted.append(SCC_array[-1])
+            SCC_forecasted.append(SCC_calculated[-1])
 
     SCC_forecasted = np.array(SCC_forecasted)
 
@@ -130,8 +137,8 @@ def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_l
         cost = cost_of_perturbation(T_total_iteration, T_perturbed, W, discount_function, gamma, D0)
         SCC = cost / (10 ** 9)
         SCC_list.append(SCC)
-    SCC_array = np.asarray(SCC_list)
-    return SCC_array
+    SCC_calculated = np.asarray(SCC_list)
+    return SCC_calculated
 
 
 def create_T_perturbed(T_TCRE, T_forecast_iteration, T_forecast_length, T_forecast_years, T_historical, k_s, perturbed_year,
