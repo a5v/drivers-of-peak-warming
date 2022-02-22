@@ -1,13 +1,11 @@
 import pandas as pd
 import numpy as np
 from scipy.integrate import simps
-import statsmodels.api as sm
-# from fair.scripts.data_retrieval import RCMIP_to_FaIR_input_emms
 
 
 def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
                             gamma=2, D0=0.00267,
-                            P_h=44, r=20, s=18, Am=1.1,
+                            P_50=100, s=0.02, P_100=500,
                             end_year=2500, last_perturbed_year=2200,
                             return_all_output=False):
 
@@ -46,7 +44,7 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
 
         SCC_forecasted, P0 = forecast_SCC(SCC_array, years_forecasted, years_of_perturbation)
 
-        forecasted_abatement = abatement(SCC_forecasted, P0, P_h, r, s, Am)
+        forecasted_abatement = abatement(P=SCC_forecasted, P0=P0, P_50=P_50, s=s, P_100=P_100, r=consumption_discount)
         forecasted_emissions = abatement_to_emissions(forecasted_abatement, CO2_baseline)
         cumulative_emissions_array = calculate_cumulative_emissions(years_forecasted, forecasted_emissions)
         temperature_change = T_TCRE * cumulative_emissions_array
@@ -196,8 +194,9 @@ def cost_of_perturbation(T, T_perturb, W, discount_function, gamma=2, D0=0.00267
     return cost
 
 
-def abatement(P, P0, P_h, r, s, Am):
-    A = Am / (1 + ((P - P0) / P_h) ** (-r / s))
+def abatement(P, P0, P_50, r, s, P_100):
+    Am = 1 + ((P_100 - P0)/(P_50 - P0))**(-s/r)
+    A = Am/(1 + ((P - P0)/(P_50 - P0))**(-s/r))
 
     return A
 
