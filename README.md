@@ -1,8 +1,8 @@
 # drivers-of-peak-warming
 
-conda create --name pyDISORT python=2.7
+conda create --name drivers-of-peak-warming
 
-conda activate pyDISORT
+conda activate drivers-of-peak-warming
 
 conda install pip
 
