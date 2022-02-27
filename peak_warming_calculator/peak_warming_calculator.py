@@ -5,7 +5,7 @@ from scipy.integrate import simps
 
 def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
                             gamma=2, D0=0.00267,
-                            P_h=100, s=0.05, P_100=500,
+                            P_h=100, s=0.05, r=0.04, P_100=500,
                             end_year=2500, last_perturbed_year=2200,
                             return_all_output=False):
 
@@ -46,7 +46,7 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
 
         SCC_forecasted, P0 = forecast_SCC(SCC_calculated, years_forecasted, years_of_perturbation)
 
-        forecasted_abatement = abatement(P=SCC_forecasted, P0=P0, P_h=P_h, s=s, P_100=P_100, r=consumption_discount)
+        forecasted_abatement = abatement(P=SCC_forecasted, P0=P0, P_h=P_h, s=s, P_100=P_100, r=r)
         forecasted_emissions = abatement_to_emissions(forecasted_abatement, CO2_baseline)
         cumulative_emissions_array = calculate_cumulative_emissions(forecasted_emissions)
         temperature_change = T_TCRE * cumulative_emissions_array
@@ -200,7 +200,7 @@ def cost_of_perturbation(T, T_perturb, W, discount_function, gamma=2, D0=0.00267
 def abatement(P, P0, P_h, r, s, P_100):
     if P0 >= P_h:
         print("P0 is greater than P_h")
-    
+
     Am = 1 + ((P_100 - P0)/(P_h - P0))**(-s/r)
     A = Am/(1 + ((P - P0)/(P_h - P0))**(-s/r))
 
