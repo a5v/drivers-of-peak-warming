@@ -198,6 +198,9 @@ def cost_of_perturbation(T, T_perturb, W, discount_function, gamma=2, D0=0.00267
 
 
 def abatement(P, P0, P_50, r, s, P_100):
+    if P0 >= P_50:
+        print("P0 is greater than P_50")
+    
     P_h = P0 + ((P_50 - P0) ** (-s / r) - 2 * (P_100 - P0) ** (-s / r)) ** (-r / s)
 
     Am = 1 + ((P_100 - P0) / (P_h - P0)) ** (-s / r)
