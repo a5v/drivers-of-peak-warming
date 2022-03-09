@@ -6,7 +6,7 @@ from scipy.integrate import simps
 def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
                             gamma=2, D0=0.00267,
                             P_50=100, s=0.05, r=0.04, P_100=500,
-                            end_year=2500, last_perturbed_year=2200,
+                            end_year=3000, last_perturbed_year=2500,
                             return_all_output=False):
 
     start_year = 1750
@@ -40,7 +40,7 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
 
         SCC_calculated = calculate_SCC_for_perturbed_years(T_TCRE, T_forecasted_iteration, years_forecasted_length, years_forecasted,
                                                       T_historical, T_complete_iteration, W, consumption_discount, k_s, years_complete,
-                                                      years_of_perturbation, gamma, D0)
+                                                      years_of_perturbation, gamma, D0, P_100)
 
         check_SCC_calculated(P_100, SCC_calculated)
 
@@ -106,7 +106,7 @@ def forecast_SCC(SCC_calculated, T_forecast_years, years_of_perturbation):
     SCC_forecasted = []
 
     for i in range(len(T_forecast_years)):
-        if i < len(years_of_perturbation):
+        if i < len(SCC_calculated):
             SCC_forecasted.append(SCC_calculated[i])
         else:
             SCC_forecasted.append(SCC_calculated[-1])
@@ -119,7 +119,7 @@ def forecast_SCC(SCC_calculated, T_forecast_years, years_of_perturbation):
 
 def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_length, T_forecast_years, T_gas_df,
                                       T_total_iteration, W, consumption_discount, k_s, years, years_of_perturbation,
-                                      gamma, D0):
+                                      gamma, D0, P_100):
     SCC_list = []
     for perturbed_year in range(len(years_of_perturbation)):
         ## define perturbation
@@ -132,7 +132,11 @@ def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_l
                                                      years_of_perturbation)
         cost = cost_of_perturbation(T_total_iteration, T_perturbed, W, discount_function, gamma, D0)
         SCC = cost / (10 ** 9)
-        SCC_list.append(SCC)
+        if SCC < P_100:
+            SCC_list.append(SCC)
+        else:
+            SCC_list.append(P_100)
+            break
     SCC_calculated = np.asarray(SCC_list)
     return SCC_calculated
 
