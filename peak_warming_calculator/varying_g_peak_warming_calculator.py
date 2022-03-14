@@ -59,7 +59,7 @@ def varying_g_peak_warming_calculator(consumption_discount=0.035,
         T_forecasted_iteration = T_2019 + temperature_change_plateau
         T_complete_iteration = np.concatenate([T_historical, T_forecasted_iteration[1:]])
 
-        if iteration == 0:
+        if iteration == 0  or iteration == 1:
             peak_T = max(T_complete_iteration)
         else:
             previous_peak_T = peak_T

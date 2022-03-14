@@ -33,7 +33,7 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
 
     CO2_baseline = get_CO2_baseline()
 
-    num_of_iterations = 10
+    num_of_iterations = 49
     T_forecasted_iteration = T_forecasted_initial
     T_complete_iteration = T_complete_initial
     for iteration in range(num_of_iterations):
@@ -56,7 +56,7 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
         T_forecasted_iteration = T_2019 + temperature_change_plateau
         T_complete_iteration = np.concatenate([T_historical, T_forecasted_iteration[1:]])
 
-        if iteration == 0:
+        if iteration == 0 or iteration == 1:
             peak_T = max(T_complete_iteration)
         else:
             previous_peak_T = peak_T
