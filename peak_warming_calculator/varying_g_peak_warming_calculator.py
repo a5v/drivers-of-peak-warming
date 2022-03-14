@@ -4,7 +4,7 @@ from scipy.integrate import simps
 
 
 def varying_g_peak_warming_calculator(consumption_discount=0.035,
-                                      g_2019=0.02,
+                                      g_2019=0.02, g_grad=0.0004,
                                       gamma=2, D0=0.00267,
                                       P_50=300, s=0.05, r=0.04, P_100=500,
                                       end_year=3000, last_perturbed_year=2500,
@@ -43,7 +43,7 @@ def varying_g_peak_warming_calculator(consumption_discount=0.035,
                                                            years_forecasted, T_historical, T_complete_iteration,
                                                            consumption_discount, k_s, years_complete,
                                                            years_of_perturbation, gamma, D0, P_100, T_2019,
-                                                           last_historical_year, start_year, g_2019)
+                                                           last_historical_year, start_year, g_2019, g_grad)
 
         check_SCC_calculated(P_100, SCC_calculated)
 
@@ -130,7 +130,7 @@ def forecast_SCC(SCC_calculated, T_forecast_years, years_of_perturbation):
 
 def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_length, T_forecast_years, T_gas_df,
                                       T_total_iteration, consumption_discount, k_s, years, years_of_perturbation,
-                                      gamma, D0, P_100, T_2019, last_historical_year, start_year, g_2019):
+                                      gamma, D0, P_100, T_2019, last_historical_year, start_year, g_2019, g_grad):
     SCC_list = []
     for perturbed_year in range(len(years_of_perturbation)):
         ## define perturbation
@@ -138,8 +138,8 @@ def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_l
         T_perturbed, T_forecast_perturbed = create_T_perturbed(T_TCRE, T_forecast_iteration, T_forecast_length, T_forecast_years,
                                                                T_gas_df, k_s, perturbed_year, years_of_perturbation)
 
-        g = create_g_forecast(g_2019, T_2019, T_forecast_iteration)
-        g_prime = create_g_forecast(g_2019, T_2019, T_forecast_perturbed) # g_2019 - g_grad * (T_forecast_perturbed[:-1] - T_2019) ** 2
+        g = create_g_forecast(g_2019, g_grad, T_2019, T_forecast_iteration)
+        g_prime = create_g_forecast(g_2019, g_grad, T_2019, T_forecast_perturbed)
 
         W = create_W_forecast(T_forecast_years, g, last_historical_year, start_year)
         W_prime = create_W_forecast(T_forecast_years, g_prime, last_historical_year, start_year)
@@ -173,8 +173,7 @@ def create_W_forecast(T_forecast_years, g, last_historical_year, start_year):
     return W
 
 
-def create_g_forecast(g_2019, T_2019, T_forecast_iteration):
-    g_grad = 0.0004
+def create_g_forecast(g_2019, g_grad, T_2019, T_forecast_iteration):
     g = g_2019 - g_grad * (T_forecast_iteration[:-1] - T_2019) ** 2
     return g
 
