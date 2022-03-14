@@ -33,7 +33,7 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
 
     CO2_baseline = get_CO2_baseline()
 
-    num_of_iterations = 49
+    num_of_iterations = 100
     T_forecasted_iteration = T_forecasted_initial
     T_complete_iteration = T_complete_initial
     for iteration in range(num_of_iterations):
@@ -65,15 +65,24 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
                 break
 
         if iteration == num_of_iterations - 1:
-            print("convergence condition not achieved")
+            print_convergence_error(P_100, P_50, consumption_discount, consumption_growth, r, s)
 
-    # peak_T = max(T_complete_iteration)
     T_complete = T_complete_iteration
 
     if return_all_output:
         return peak_T, SCC_forecasted, forecasted_abatement, forecasted_emissions, T_complete
     else:
         return peak_T
+
+
+def print_convergence_error(P_100, P_50, consumption_discount, consumption_growth, r, s):
+    print("convergence condition not achieved")
+    print(f"{consumption_discount=}")
+    print(f"{consumption_growth=}")
+    print(f"{P_50=}")
+    print(f"{s=}")
+    print(f"{r=}")
+    print(f"{P_100=}")
 
 
 def check_SCC_calculated(P_100, SCC_calculated):
