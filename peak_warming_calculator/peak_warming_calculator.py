@@ -64,6 +64,9 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
             if abs(peak_T - previous_peak_T) < 0.005:
                 break
 
+        if iteration == num_of_iterations - 1:
+            print("convergence condition not achieved")
+
     # peak_T = max(T_complete_iteration)
     T_complete = T_complete_iteration
 

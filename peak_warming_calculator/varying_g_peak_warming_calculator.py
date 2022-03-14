@@ -67,6 +67,9 @@ def varying_g_peak_warming_calculator(consumption_discount=0.035,
             if abs(peak_T - previous_peak_T) < 0.005:
                 break
 
+        if iteration == num_of_iterations - 1:
+            print("convergence condition not achieved")
+
     # peak_T = max(T_complete_iteration)
     T_complete = T_complete_iteration
 
@@ -149,6 +152,8 @@ def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_l
                                                      years_of_perturbation)
         cost = cost_of_perturbation(W, W_prime, discount_function, gamma, D0)
         SCC = cost / (10 ** 9)
+        if perturbed_year == 0 and SCC > P_100:
+            print("P_100 achieved in first year")
         if SCC < P_100:
             SCC_list.append(SCC)
         else:
@@ -217,13 +222,13 @@ def create_years_array(first_year, end_year):
     return years
 
 
-def create_total_consumption(first_year, last_historical_year, years, consumption_growth):
-    W_2019 = 80
-    W = []
-    for i in range(len(years)):
-        W.append(W_2019 * np.exp(consumption_growth * (i - (last_historical_year - first_year))))
-    W = np.asarray(W)
-    return W
+# def create_total_consumption(first_year, last_historical_year, years, consumption_growth):
+#     W_2019 = 80
+#     W = []
+#     for i in range(len(years)):
+#         W.append(W_2019 * np.exp(consumption_growth * (i - (last_historical_year - first_year))))
+#     W = np.asarray(W)
+#     return W
 
 
 def cost_of_perturbation(W, W_prime, discount_function, gamma=2, D0=0.00267):
