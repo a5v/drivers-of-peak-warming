@@ -4,7 +4,7 @@ from scipy.integrate import simps
 
 
 def varying_g_peak_warming_calculator(consumption_discount=0.035,
-                                      g_2019=0.02, g_grad=0.0004,
+                                      g_2019=0.02, g_grad=0.0013,
                                       gamma=2, D0=0.00267,
                                       P_50=300, s=0.05, r=0.04, P_100=500,
                                       end_year=3000, last_perturbed_year=2500,
@@ -68,7 +68,7 @@ def varying_g_peak_warming_calculator(consumption_discount=0.035,
                 break
 
         if iteration == num_of_iterations - 1:
-            print_convergence_error(P_100, P_50, consumption_discount, g_2019, r, s)
+            print_convergence_error(P_100, P_50, consumption_discount, g_2019, r, s, peak_T, previous_peak_T)
 
     # peak_T = max(T_complete_iteration)
     T_complete = T_complete_iteration
@@ -79,7 +79,7 @@ def varying_g_peak_warming_calculator(consumption_discount=0.035,
         return peak_T
 
 
-def print_convergence_error(P_100, P_50, consumption_discount, g_2019, r, s):
+def print_convergence_error(P_100, P_50, consumption_discount, g_2019, r, s, peak_T, previous_peak_T):
     print("convergence condition not achieved")
     print(f"{consumption_discount=}")
     print(f"{g_2019=}")
@@ -87,6 +87,8 @@ def print_convergence_error(P_100, P_50, consumption_discount, g_2019, r, s):
     print(f"{s=}")
     print(f"{r=}")
     print(f"{P_100=}")
+    print(f"{peak_T=}")
+    print(f"{previous_peak_T=}")
 
 
 def check_SCC_calculated(P_100, SCC_calculated):
@@ -189,7 +191,7 @@ def create_W_forecast(T_forecast_years, g, last_historical_year, start_year):
 
 
 def create_g_forecast(g_2019, g_grad, T_2019, T_forecast_iteration):
-    g = g_2019 - g_grad * (T_forecast_iteration[:-1] - T_2019) ** 2
+    g = g_2019 - g_grad * (T_forecast_iteration[:-1] - T_2019)
     return g
 
 
