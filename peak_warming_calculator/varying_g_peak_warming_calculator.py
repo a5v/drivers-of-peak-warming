@@ -6,7 +6,7 @@ from scipy.integrate import simps
 def varying_g_peak_warming_calculator(consumption_discount=0.035,
                                       g_2019=0.02, g_grad=0.0013,
                                       gamma=2, D0=0.00267,
-                                      P_50=300, s=0.05, r=0.04, P_100=500,
+                                      P_50=300, s=0.05, r=0.03, P_100=500, P0_prime=20,
                                       end_year=3000, last_perturbed_year=2500,
                                       return_all_output=False):
 
@@ -43,13 +43,14 @@ def varying_g_peak_warming_calculator(consumption_discount=0.035,
                                                            years_forecasted, T_historical, T_complete_iteration,
                                                            consumption_discount, k_s, years_complete,
                                                            years_of_perturbation, gamma, D0, P_100, T_2019,
-                                                           last_historical_year, start_year, g_2019, g_grad)
+                                                           last_historical_year, start_year, g_2019, g_grad, P0_prime)
 
         check_SCC_calculated(P_100, SCC_calculated)
 
         SCC_forecasted, P0 = forecast_SCC(SCC_calculated, years_forecasted, years_of_perturbation)
+        SCC_forecasted_adjusted = SCC_forecasted - (P0_prime - P0)
 
-        forecasted_abatement = abatement(P=SCC_forecasted, P0=P0, P_50=P_50, s=s, P_100=P_100, r=r)
+        forecasted_abatement = abatement(P=SCC_forecasted_adjusted, P0=P0_prime, P_50=P_50, s=s, P_100=P_100, r=r)
         forecasted_emissions = abatement_to_emissions(forecasted_abatement, CO2_baseline)
         cumulative_emissions_array = calculate_cumulative_emissions(forecasted_emissions)
         temperature_change = T_TCRE * cumulative_emissions_array
@@ -59,7 +60,7 @@ def varying_g_peak_warming_calculator(consumption_discount=0.035,
         T_forecasted_iteration = T_2019 + temperature_change_plateau
         T_complete_iteration = np.concatenate([T_historical, T_forecasted_iteration[1:]])
 
-        if iteration == 0  or iteration == 1:
+        if iteration == 0 or iteration == 1:
             peak_T = max(T_complete_iteration)
         else:
             previous_peak_T = peak_T
@@ -145,7 +146,7 @@ def forecast_SCC(SCC_calculated, T_forecast_years, years_of_perturbation):
 
 def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_length, T_forecast_years, T_gas_df,
                                       T_total_iteration, consumption_discount, k_s, years, years_of_perturbation,
-                                      gamma, D0, P_100, T_2019, last_historical_year, start_year, g_2019, g_grad):
+                                      gamma, D0, P_100, T_2019, last_historical_year, start_year, g_2019, g_grad, P0_prime):
     SCC_list = []
     for perturbed_year in range(len(years_of_perturbation)):
         ## define perturbation
@@ -164,13 +165,26 @@ def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_l
                                                      years_of_perturbation)
         cost = cost_of_perturbation(W, W_prime, discount_function, gamma, D0)
         SCC = cost / (10 ** 9)
-        if perturbed_year == 0 and SCC > P_100:
+        # if perturbed_year == 0 and SCC > P_100:
+        #     print("P_100 achieved in first year")
+        # if SCC < P_100:
+        #     SCC_list.append(SCC)
+        # else:
+        #     SCC_list.append(P_100)
+        #     break
+        if perturbed_year == 0 and P0_prime > P_100:
             print("P_100 achieved in first year")
-        if SCC < P_100:
-            SCC_list.append(SCC)
+            print(SCC)
+        elif perturbed_year == 0:  # and SCC > P_100
+            P0 = SCC
+            SCC_list.append(P0_prime)
         else:
-            SCC_list.append(P_100)
-            break
+            SCC_adjusted = SCC - (P0 - P0_prime)
+            if SCC_adjusted < P_100:
+                SCC_list.append(SCC_adjusted)
+            else:
+                SCC_list.append(P_100)
+                break
     SCC_calculated = np.asarray(SCC_list)
     return SCC_calculated
 
@@ -243,7 +257,7 @@ def create_years_array(first_year, end_year):
 #     return W
 
 
-def cost_of_perturbation(W, W_prime, discount_function, gamma=2, D0=0.00267):
+def cost_of_perturbation(W, W_prime, discount_function):
     # S_Wt = D0 * T ** gamma
     # S_Wt_perturb = D0 * T_perturb ** gamma
     # consumption_loss_fraction = S_Wt_perturb - S_Wt
