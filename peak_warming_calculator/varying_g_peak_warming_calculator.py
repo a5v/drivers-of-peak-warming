@@ -3,7 +3,7 @@ import numpy as np
 from scipy.integrate import simps
 
 
-def varying_g_peak_warming_calculator(consumption_discount=0.035,
+def varying_g_peak_warming_calculator(consumption_discount=0.035, growth_adjustment=0.015,
                                       g_2019=0.02, g_grad=0.0026,
                                       gamma=2, D0=0.00267,
                                       P_50=300, s=0.05, r=0.03, P_100=500, P0_prime=20,
@@ -43,7 +43,8 @@ def varying_g_peak_warming_calculator(consumption_discount=0.035,
                                                            years_forecasted, T_historical, T_complete_iteration,
                                                            consumption_discount, k_s, years_complete,
                                                            years_of_perturbation, gamma, D0, P_100, T_2019,
-                                                           last_historical_year, start_year, g_2019, g_grad, P0_prime)
+                                                           last_historical_year, start_year, g_2019, g_grad, P0_prime,
+                                                           growth_adjustment)
 
         check_SCC_calculated(P_100, SCC_calculated)
 
@@ -146,7 +147,8 @@ def forecast_SCC(SCC_calculated, T_forecast_years, years_of_perturbation):
 
 def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_length, T_forecast_years, T_gas_df,
                                       T_total_iteration, consumption_discount, k_s, years, years_of_perturbation,
-                                      gamma, D0, P_100, T_2019, last_historical_year, start_year, g_2019, g_grad, P0_prime):
+                                      gamma, D0, P_100, T_2019, last_historical_year, start_year, g_2019, g_grad, P0_prime,
+                                      growth_adjustment):
     SCC_list = []
     for perturbed_year in range(len(years_of_perturbation)):
         ## define perturbation
@@ -157,11 +159,13 @@ def calculate_SCC_for_perturbed_years(T_TCRE, T_forecast_iteration, T_forecast_l
         g = create_g_forecast(g_2019, g_grad, T_2019, T_forecast_iteration)
         g_prime = create_g_forecast(g_2019, g_grad, T_2019, T_forecast_perturbed)
 
+        growth_adjusted_consumption_discount = g[perturbed_year] + growth_adjustment
+
         W = create_W_forecast(T_forecast_years, g, last_historical_year, start_year)
         W_prime = create_W_forecast(T_forecast_years, g_prime, last_historical_year, start_year)
 
         ## define discount function
-        discount_function = create_discount_function(consumption_discount, perturbed_year, years,
+        discount_function = create_discount_function(growth_adjusted_consumption_discount, perturbed_year, years,
                                                      years_of_perturbation)
         cost = cost_of_perturbation(W, W_prime, discount_function, gamma, D0)
         SCC = cost / (10 ** 9)
