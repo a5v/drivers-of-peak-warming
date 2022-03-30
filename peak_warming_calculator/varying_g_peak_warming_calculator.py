@@ -4,7 +4,7 @@ from scipy.integrate import simps
 
 
 def varying_g_peak_warming_calculator(consumption_discount=0.035,
-                                      g_2019=0.02, g_grad=0.0013,
+                                      g_2019=0.02, g_grad=0.0026,
                                       gamma=2, D0=0.00267,
                                       P_50=300, s=0.05, r=0.03, P_100=500, P0_prime=20,
                                       end_year=3000, last_perturbed_year=2500,
@@ -257,7 +257,7 @@ def create_years_array(first_year, end_year):
 #     return W
 
 
-def cost_of_perturbation(W, W_prime, discount_function):
+def cost_of_perturbation(W, W_prime, discount_function, gamma=2, D0=0.00267):
     # S_Wt = D0 * T ** gamma
     # S_Wt_perturb = D0 * T_perturb ** gamma
     # consumption_loss_fraction = S_Wt_perturb - S_Wt
