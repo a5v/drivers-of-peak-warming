@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-from scipy.integrate import simps
-
 
 def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
                             gamma=2, D0=0.00267,
@@ -216,7 +214,7 @@ def cost_of_perturbation(T, T_perturb, W, discount_function, gamma=2, D0=0.00267
     consumption_loss_fraction = S_Wt_perturb - S_Wt
     absolute_consumption_loss = consumption_loss_fraction * W
     discounted_consumption_loss = absolute_consumption_loss * discount_function
-    area = simps(discounted_consumption_loss, dx=1)
+    area = sum(discounted_consumption_loss)
     cost = area * 10 ** 12  # convert to dollar amount
 
     return cost
