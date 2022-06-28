@@ -5,7 +5,7 @@ from scipy.integrate import simps
 
 def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
                             gamma=2, D0=0.00267,
-                            P_50=100, s=0.05, r=0.04, P_100=500,
+                            P_50=100, s=0.05, r=0.04, P_100=300,
                             end_year=3000, last_perturbed_year=2500,
                             return_all_output=False):
 
@@ -21,10 +21,11 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
     T_TCRE = 0.00054  # need to check this! Note this is 1 GtCO2
     k_s = 0.12
 
-    delta_T = 2
+    delta_T = 3
     alpha = 0.02
 
     T_2019, T_historical = read_historical_T()
+    T_2019 = 1.2
 
     T_complete_initial, T_forecasted_initial = create_T_initial(T_2019, T_historical, alpha, delta_T,
                                                                 years_forecasted_length)
@@ -99,7 +100,7 @@ def temp_change_plateau(temperature_change):
 
 
 def create_T_initial(T_2019, T_historical, alpha, delta_T, years_forecasted_length):
-    T_forecasted_initial = T_2019 + delta_T * (1 - np.exp(-alpha * np.arange(years_forecasted_length)))
+    T_forecasted_initial = T_2019 + (delta_T-T_2019) * (1 - np.exp(-alpha * np.arange(years_forecasted_length)))
     T_complete_initial = np.concatenate([T_historical, T_forecasted_initial[1:]])
     return T_complete_initial, T_forecasted_initial
 
