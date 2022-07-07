@@ -23,13 +23,13 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
 
         SCC_ts_to_P_100 = []
         for SCC_year in range(len(years_of_perturbation)):
-            W = create_total_consumption(years, consumption_growth=consumption_growth)
-            discount_function = create_discount_function(years, SCC_year=years_of_perturbation[SCC_year],
+            W_ts = create_total_consumption(years, consumption_growth=consumption_growth)
+            discount_function_ts = create_discount_function(years, SCC_year=years_of_perturbation[SCC_year],
                                                          consumption_discount=consumption_discount)
             T_perturbed_ts = create_geometric_T_perturbed(years, T=T_ts, SCC_year=years_of_perturbation[SCC_year],
                                                           T_TCRE=T_TCRE_1*size_of_perturbation, k_s=k_s)
 
-            time_series_data = {'years': years, 'W': W, 'discount function': discount_function,
+            time_series_data = {'years': years, 'W': W_ts, 'discount function': discount_function_ts,
                                 'T': T_ts, 'T perturbed': T_perturbed_ts}
             time_series_df = pd.DataFrame(data=time_series_data).set_index('years')
 
