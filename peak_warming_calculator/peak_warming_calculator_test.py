@@ -9,7 +9,7 @@ def peak_warming_calculator(consumption_discount=0.035, consumption_growth=0.02,
                             T_TCRE_1=0.00054, k_s=0.12,
                             T_0=1.2, delta_T=3, alpha=0.02,
                             size_of_perturbation=1,
-                            CO2_baseline=40.339401131162724,
+                            CO2_baseline=40,
                             return_all_output=False):
 
     years = create_years_array(start_year, end_year)
